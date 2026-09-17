@@ -1,0 +1,59 @@
+---
+import { withBase } from '@lib/paths';
+import { business } from '@data/business';
+import Wordmark from './Wordmark.astro';
+import Icon from './Icons.astro';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer section--navy on-dark">
+  <div class="container site-footer__grid">
+    <div>
+      <Wordmark size="md" onDark />
+      <p class="site-footer__since">Simi Valley, CA · Since {business.since}</p>
+      <p class="site-footer__desc">Build-your-own Mongolian BBQ bowls grilled fresh for dine-in, plus a full Chinese menu for pickup and delivery.</p>
+    </div>
+    <div>
+      <h2 class="site-footer__h">Visit</h2>
+      <address>
+        <a class="site-footer__link" href={business.directionsUrl} target="_blank" rel="noopener">{business.address.street} {business.address.unit}<br />{business.address.city}, {business.address.region} {business.address.postalCode}</a>
+      </address>
+      <a class="site-footer__link" href={`tel:${business.phone.e164}`}><Icon name="phone" /> {business.phone.display}</a>
+    </div>
+    <div>
+      <h2 class="site-footer__h">Hours</h2>
+      <ul class="site-footer__hours">
+        {business.hoursSummary.map((h) => (<li><span>{h.label}</span><span>{h.value}</span></li>))}
+      </ul>
+      <p class="small site-footer__note">{business.orderingCutoffNote}</p>
+    </div>
+    <div>
+      <h2 class="site-footer__h">Order</h2>
+      <a class="btn btn--primary" href={business.order.doordash.url} target="_blank" rel="noopener"><Icon name="bag" /> Order on DoorDash</a>
+      <ul class="site-footer__links">
+        <li><a class="site-footer__link" href={withBase('/menu/')}>Full menu</a></li>
+        <li><a class="site-footer__link" href={business.directionsUrl} target="_blank" rel="noopener">Get directions <Icon name="external" /></a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container site-footer__bottom">
+    <p class="small">© {year} {business.name}. All rights reserved.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer { padding-block: clamp(3rem, 6vw, 4.5rem) 1.5rem; }
+  .site-footer__grid { display: grid; gap: 2rem; }
+  @media (min-width: 40rem) { .site-footer__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .site-footer__grid { grid-template-columns: 1.4fr 1fr 1fr 1.1fr; gap: 3rem; } }
+  .site-footer__since { color: var(--c-amber); font-weight: 650; margin-top: 0.9rem; }
+  .site-footer__desc { color: #c9d2e4; max-width: 34ch; margin-top: 0.5rem; }
+  .site-footer__h { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-amber); font-weight: 700; margin-bottom: 0.8rem; }
+  .site-footer__link { display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none; padding-block: 0.25rem; }
+  .site-footer__link:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+  .site-footer__link svg { width: 1rem; height: 1rem; }
+  address { margin-bottom: 0.5rem; }
+  .site-footer__hours li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.3rem 0; border-bottom: 1px solid rgb(255 255 255 / 0.15); max-width: 20rem; }
+  .site-footer__note { color: #c9d2e4; margin-top: 0.7rem; max-width: 30ch; }
+  .site-footer__links { margin-top: 1rem; display: grid; gap: 0.2rem; }
+  .site-footer__bottom { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid rgb(255 255 255 / 0.15); color: #c9d2e4; }
+</style>

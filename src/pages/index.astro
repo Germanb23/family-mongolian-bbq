@@ -1,0 +1,298 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/Hero.astro';
+import FoodPhoto from '@components/FoodPhoto.astro';
+import DishDialog from '@components/DishDialog.astro';
+import HoursTable from '@components/HoursTable.astro';
+import Gallery from '@components/Gallery.astro';
+import Icon from '@components/Icons.astro';
+import { withBase } from '@lib/paths';
+import { business } from '@data/business';
+import { featuredCodes, findItem } from '@data/menu';
+import { photos, place } from '@data/photos';
+import { portraits, portraitFull } from '@data/portraits';
+
+const featured = featuredCodes.map((c) => findItem(c)!).filter(Boolean);
+const placeSrc = (id: string, w: number) => `/img/place/${id}-${w}.webp`;
+const placeSet = (id: string) => `${withBase(placeSrc(id, 480))} 480w, ${withBase(placeSrc(id, 900))} 900w, ${withBase(placeSrc(id, 1600))} 1600w`;
+
+/** Short, verified DoorDash review excerpts (public reviews on the store page, observed Sept 17, 2026). */
+const reviews = [
+  { quote: 'The food was fast, fresh, and delicious.', who: 'Heather K.', when: 'Oct 2023' },
+  { quote: 'Food always taste hot and fresh. Portions are more than enough for 2 people.', who: 'Pilar S.', when: 'Aug 2025' },
+  { quote: 'Family Mongolian BBQ has the best wor wonton soup ever.', who: 'Leti M.', when: 'Mar 2026' },
+];
+
+/** Gallery: the journey in pictures — place photos (16:9) and owner food photography (landscape 4:3 and portrait 9:16). */
+const gallery = [
+  { src: placeSrc(place.exteriorEvening.id, 900), full: placeSrc(place.exteriorEvening.id, 1600), alt: place.exteriorEvening.alt, caption: 'Tapo Street at dusk', w: 16, h: 9 },
+  { src: placeSrc(place.entranceEvening.id, 900), full: placeSrc(place.entranceEvening.id, 1600), alt: place.entranceEvening.alt, caption: 'The front door, Suite G', w: 16, h: 9 },
+  { src: placeSrc(place.interiorOfficial.id, 900), full: placeSrc(place.interiorOfficial.id, 1600), alt: place.interiorOfficial.alt, caption: 'Booths, pendants and the grill', w: 16, h: 9 },
+  { src: portraitFull('bbq-bar-ingredients', 600), full: portraitFull('bbq-bar-ingredients', 941), alt: portraits['bbq-bar-ingredients'].alt, caption: 'The Mongolian BBQ bar', w: 941, h: 1672 },
+  { src: `/img/food/bbq-bowl-raw-900.webp`, full: `/img/food/bbq-bowl-raw-1600.webp`, alt: photos['bbq-bowl-raw'].alt, caption: 'A bowl before the grill', w: 4, h: 3 },
+  { src: portraitFull('spread-cooked', 600), full: portraitFull('spread-cooked', 941), alt: portraits['spread-cooked'].alt, caption: 'Dinner for the table', w: 941, h: 1672 },
+  { src: `/img/food/spread-four-plates-900.webp`, full: `/img/food/spread-four-plates-1600.webp`, alt: photos['spread-four-plates'].alt, caption: 'Beef, walnut shrimp, kung pao and pot stickers', w: 4, h: 3 },
+  { src: portraitFull('kung-pao-combination', 600), full: portraitFull('kung-pao-combination', 941), alt: portraits['kung-pao-combination'].alt, caption: 'Kung Pao Combination', w: 941, h: 1672 },
+  { src: portraitFull('spread-overhead', 600), full: portraitFull('spread-overhead', 941), alt: portraits['spread-overhead'].alt, caption: 'From the kitchen', w: 941, h: 1672 },
+  { src: `/img/food/soups-trio-900.webp`, full: `/img/food/soups-trio-1600.webp`, alt: photos['soups-trio'].alt, caption: 'Soups', w: 4, h: 3 },
+  { src: portraitFull('house-noodles', 600), full: portraitFull('house-noodles', 941), alt: portraits['house-noodles'].alt, caption: 'House noodles with shrimp, beef and chicken', w: 941, h: 1672 },
+  { src: portraitFull('moo-shu', 600), full: portraitFull('moo-shu', 941), alt: portraits['moo-shu'].alt, caption: 'Moo shu pancakes', w: 941, h: 1672 },
+];
+---
+<BaseLayout title={business.name} description={business.description}>
+  <Hero />
+
+  <!-- ARRIVAL — exterior → door → dining room -->
+  <section class="section arrival editorial" id="experience" aria-labelledby="arrival-title">
+    <span class="ghost arrival__ghost" aria-hidden="true">Tapo St</span>
+    <div class="container arrival__grid">
+      <div class="arrival__copy">
+        <p class="eyebrow" data-reveal>2321 Tapo St, Suite G</p>
+        <h2 class="editorial__title" id="arrival-title" data-reveal style="--i: 1">Park out front. <em>Walk into the glow.</em></h2>
+        <p class="lede" data-reveal style="--i: 2">A tile-roofed storefront in the Tapo Street plaza, lanterns lit at dusk. Through the door: long rows of navy tufted booths under amber stained-glass pendants, the sauce bar and grill station along the back wall. A neighborhood dining room since {business.since}.</p>
+      </div>
+      <figure class="photo arrival__photo arrival__photo--exterior" data-reveal style="--i: 1">
+        <img src={withBase(placeSrc(place.exteriorEvening.id, 900))} srcset={placeSet(place.exteriorEvening.id)} sizes="(min-width: 64rem) 60vw, 92vw" width={place.exteriorEvening.w} height={place.exteriorEvening.h} alt={place.exteriorEvening.alt} loading="lazy" decoding="async" data-parallax="0.05" />
+        <figcaption class="arrival__cap">Tapo Street at dusk</figcaption>
+      </figure>
+      <figure class="photo arrival__photo arrival__photo--door" data-reveal style="--i: 3">
+        <img src={withBase(placeSrc(place.entranceEvening.id, 900))} srcset={placeSet(place.entranceEvening.id)} sizes="(min-width: 64rem) 34vw, 92vw" width={place.entranceEvening.w} height={place.entranceEvening.h} alt={place.entranceEvening.alt} loading="lazy" decoding="async" data-parallax="-0.04" />
+        <figcaption class="arrival__cap">The open door, Suite G</figcaption>
+      </figure>
+      <figure class="photo arrival__photo arrival__photo--room" data-reveal style="--i: 4">
+        <img src={withBase(placeSrc(place.interiorOfficial.id, 900))} srcset={placeSet(place.interiorOfficial.id)} sizes="(min-width: 64rem) 66vw, 92vw" width={place.interiorOfficial.w} height={place.interiorOfficial.h} alt={place.interiorOfficial.alt} loading="lazy" decoding="async" data-parallax="0.04" />
+        <figcaption class="arrival__cap">The dining room</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- THE GRILL — the signature dine-in experience -->
+  <section class="section section--navy on-dark grill editorial" id="grill" aria-labelledby="grill-title">
+    <span class="ghost ghost--fill grill__ghost" aria-hidden="true">Grill</span>
+    <div class="container grill__grid">
+      <div class="grill__copy">
+        <p class="eyebrow" data-reveal>The Mongolian BBQ grill · Dine-in</p>
+        <h2 class="editorial__title" id="grill-title" data-reveal style="--i: 1">You build the bowl. <em>We fire the grill.</em></h2>
+        <p class="lede" data-reveal style="--i: 2">Start with noodles or rice, pile on thin-sliced beef, pork, shrimp or tofu, load up fresh vegetables, then finish with the house sauces and oils. It goes onto the grill and comes back hot.</p>
+        <ol class="steps">
+          <li data-reveal style="--i: 3"><span class="steps__n">1</span><div><strong>Pick a base</strong><span>Fresh noodles or steamed rice</span></div></li>
+          <li data-reveal style="--i: 4"><span class="steps__n">2</span><div><strong>Choose your proteins</strong><span>Sliced beef, pork, shrimp, calamari, tofu</span></div></li>
+          <li data-reveal style="--i: 5"><span class="steps__n">3</span><div><strong>Load the vegetables</strong><span>Broccoli, cabbage, onions, mushrooms, sprouts, peppers, jalapeños and more</span></div></li>
+          <li data-reveal style="--i: 6"><span class="steps__n">4</span><div><strong>Sauce it, grill it</strong><span>House sauces, garlic, chili, sesame, grilled fresh</span></div></li>
+        </ol>
+        <p class="small grill__note" data-reveal style="--i: 7">The grill is a dine-in experience at Tapo Street. Everything on the <a class="link" href={withBase('/menu/')}>full menu</a> is available for pickup and delivery.</p>
+      </div>
+      <div class="grill__photos">
+        <figure class="photo grill__photo grill__photo--bar" data-reveal style="--i: 2">
+          <FoodPhoto id="bbq-bar-ingredients" sizes="(min-width: 64rem) 46vw, 92vw" />
+          <figcaption class="grill__cap">The bar: meats, vegetables, noodles, rice and sauces</figcaption>
+        </figure>
+        <figure class="photo grill__photo grill__photo--bowl" data-reveal style="--i: 4">
+          <img src={withBase(portraitFull('bbq-bowl-raw', 600))} width="600" height="1066" alt={portraits['bbq-bowl-raw'].alt} loading="lazy" decoding="async" />
+          <figcaption class="grill__cap">A bowl, ready for the grill</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU HIGHLIGHTS -->
+  <section class="section highlights editorial" id="menu" aria-labelledby="menu-title">
+    <div class="container">
+      <div class="section-head section-head--split">
+        <div>
+          <p class="eyebrow" data-reveal>From the kitchen</p>
+          <h2 class="editorial__title" id="menu-title" data-reveal style="--i: 1">Wok favorites for the table, <em>or to go.</em></h2>
+        </div>
+        <p class="lede" data-reveal style="--i: 2">A full Chinese menu — chicken, beef, pork, seafood, egg foo young, soups, rice and noodles — cooked to order for pickup and delivery. Tap a dish for a closer look.</p>
+      </div>
+      <ul class="dishes">
+        {featured.map(({ item, category }, idx) => {
+          const p = photos[item.photo!];
+          return (
+            <li data-reveal style={`--i: ${idx}`}>
+              <button
+                class="dish-card"
+                type="button"
+                data-dish
+                data-dish-img={withBase(`/img/food/${p.id}-1600.webp`)}
+                data-dish-alt={p.alt}
+                data-dish-name={item.name}
+                data-dish-cat={category.name}
+                data-dish-desc={item.description || ''}
+                data-dish-price={item.price}
+                aria-haspopup="dialog"
+              >
+                <span class="photo dish-card__photo"><FoodPhoto id={p.id} sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 92vw" /></span>
+                <span class="dish-card__body">
+                  <span class="dish-card__name">{item.name}</span>
+                  <span class="dish-card__meta">{category.name} · from ${item.price}</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <div class="highlights__actions" data-reveal>
+        <a class="btn btn--secondary btn--lg" href={withBase('/menu/')}>See the full menu <Icon name="arrow" /></a>
+        <a class="btn btn--primary btn--lg" href={business.order.doordash.url} target="_blank" rel="noopener"><Icon name="bag" /> Order Online</a>
+      </div>
+      <p class="small muted highlights__note">Prices are starting pickup prices from the restaurant's online ordering. Delivery pricing on DoorDash is higher; dine-in pricing may differ.</p>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="section section--cream gallery-section" id="gallery" aria-labelledby="gallery-title">
+    <div class="container">
+      <div class="section-head section-head--split">
+        <div>
+          <p class="eyebrow" data-reveal>Gallery</p>
+          <h2 class="editorial__title" id="gallery-title" data-reveal style="--i: 1">The room, the bar, <em>the plates.</em></h2>
+        </div>
+        <p class="lede" data-reveal style="--i: 2">Every photo here is ours: the storefront and dining room on Tapo Street, the Mongolian BBQ bar, and dishes from the kitchen.</p>
+      </div>
+      <Gallery slides={gallery} label="Restaurant and food photographs" group="home" />
+    </div>
+  </section>
+
+  <!-- PROOF -->
+  <section class="section section--tight proof" aria-labelledby="proof-title">
+    <div class="container proof__grid">
+      <div class="proof__rating" data-reveal>
+        <p class="eyebrow">What guests say</p>
+        <h2 id="proof-title" class="proof__score"><Icon name="star" /> {business.proof.doordash.rating}<span class="proof__of"> / 5</span></h2>
+        <p class="muted">{business.proof.doordash.ratingsLabel} on {business.proof.doordash.source}</p>
+      </div>
+      <ul class="quotes">
+        {reviews.map((r, idx) => (
+          <li class="quote" data-reveal style={`--i: ${idx + 1}`}>
+            <blockquote><p>“{r.quote}”</p></blockquote>
+            <p class="quote__who small muted">{r.who} · DoorDash review, {r.when}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- VISIT -->
+  <section class="section section--cream visit editorial" id="visit" aria-labelledby="visit-title">
+    <div class="container visit__grid">
+      <div data-reveal>
+        <p class="eyebrow">Visit</p>
+        <h2 class="editorial__title visit__title" id="visit-title">Find us on <em>Tapo Street.</em></h2>
+        <address class="visit__address">
+          <strong>{business.name}</strong><br />
+          {business.address.street} {business.address.unit}<br />
+          {business.address.city}, {business.address.region} {business.address.postalCode}
+        </address>
+        <div class="visit__actions">
+          <a class="btn btn--secondary" href={business.directionsUrl} target="_blank" rel="noopener"><Icon name="pin" /> Get directions <Icon name="external" /></a>
+          <a class="btn btn--secondary" href={`tel:${business.phone.e164}`}><Icon name="phone" /> {business.phone.display}</a>
+        </div>
+        <p class="small muted visit__parking">Storefront parking in the Tapo Street plaza. Dine-in, takeout and delivery.</p>
+      </div>
+      <div class="visit__hours" data-reveal style="--i: 2">
+        <h3 class="visit__h3"><Icon name="clock" /> Hours</h3>
+        <HoursTable />
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="section cta" aria-labelledby="cta-title">
+    <div class="container cta__inner" data-reveal>
+      <div>
+        <h2 id="cta-title">Hungry now?</h2>
+        <p class="lede">Order for delivery or pickup in a couple of taps, or come in and build a bowl at the grill.</p>
+      </div>
+      <div class="cta__actions">
+        <a class="btn btn--primary btn--lg" href={business.order.doordash.url} target="_blank" rel="noopener"><Icon name="bag" /> Order on DoorDash</a>
+        <a class="btn btn--secondary btn--lg" href={withBase('/menu/')}>View Menu</a>
+      </div>
+    </div>
+  </section>
+
+  <DishDialog />
+</BaseLayout>
+
+<style>
+  /* Arrival */
+  .arrival { overflow: hidden; }
+  .arrival__ghost { right: -0.06em; top: -0.12em; }
+  .arrival__grid { position: relative; z-index: 1; display: grid; gap: 1.25rem; }
+  .arrival__copy { display: grid; gap: 1rem; margin-bottom: 0.75rem; }
+  .arrival__photo { margin: 0; aspect-ratio: 16 / 9; }
+  .arrival__photo img { transition: none; }
+  .arrival__cap { position: absolute; left: 0.85rem; bottom: 0.85rem; padding: 0.3rem 0.7rem; border-radius: 999px; background: rgb(250 248 244 / 0.9); color: var(--c-ink); font-size: 0.8rem; font-weight: 600; z-index: 1; }
+  @media (min-width: 64rem) {
+    .arrival__grid { grid-template-columns: repeat(12, 1fr); grid-auto-rows: auto; gap: 1.25rem 1.5rem; }
+    .arrival__copy { grid-column: 1 / 6; grid-row: 1; align-self: end; padding-bottom: 1rem; }
+    /* The exterior slides under the headline's last line; the door photo tucks under its lower-left corner. */
+    .arrival__photo--exterior { grid-column: 5 / 13; grid-row: 1; margin-left: -1.5rem; }
+    .arrival__photo--door { grid-column: 1 / 5; grid-row: 2; margin-top: -3rem; z-index: 2; box-shadow: var(--shadow); }
+    .arrival__photo--room { grid-column: 5 / 13; grid-row: 2; }
+    .editorial__title { position: relative; z-index: 2; }
+  }
+
+  /* Grill */
+  .grill { overflow: hidden; }
+  .grill__ghost { left: -0.04em; bottom: -0.1em; }
+  .grill__grid { position: relative; z-index: 1; display: grid; gap: 2.5rem; align-items: center; }
+  @media (min-width: 64rem) { .grill__grid { grid-template-columns: 1fr 1.1fr; gap: 4rem; } }
+  .grill__copy { display: grid; gap: 1.1rem; }
+  .steps { display: grid; gap: 0.75rem; margin-top: 0.5rem; }
+  .steps li { display: flex; gap: 0.9rem; align-items: flex-start; }
+  .steps__n { flex: none; width: 2.1rem; height: 2.1rem; display: grid; place-items: center; border-radius: 999px; background: var(--c-amber); color: var(--c-navy-deep); font-family: var(--font-display); font-weight: 800; }
+  .steps li div { display: grid; }
+  .steps li strong { color: var(--c-white); }
+  .steps li span:not(.steps__n) { color: #c9d2e4; font-size: 0.95rem; }
+  .grill__note { color: #c9d2e4; max-width: 44ch; }
+  .grill__photos { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; align-items: start; }
+  .grill__photo { margin: 0; }
+  .grill__photo--bar { grid-column: 1 / -1; aspect-ratio: 4 / 3; }
+  .grill__photo--bowl { grid-column: 2; aspect-ratio: 4 / 5; margin-top: -4rem; box-shadow: var(--shadow); }
+  .grill__photo--bowl img { width: 100%; height: 100%; object-fit: cover; object-position: center 45%; }
+  .grill__cap { position: absolute; left: 0.75rem; bottom: 0.75rem; padding: 0.3rem 0.65rem; border-radius: 999px; background: rgb(19 38 74 / 0.75); color: var(--c-white); font-size: 0.8rem; font-weight: 600; }
+  @media (max-width: 40rem) { .grill__photo--bowl { grid-column: 1 / -1; aspect-ratio: 3 / 2; margin-top: 0; } }
+
+  /* Highlights */
+  .dishes { display: grid; gap: 1.1rem; grid-template-columns: 1fr; }
+  @media (min-width: 40rem) { .dishes { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 64rem) { .dishes { grid-template-columns: repeat(4, 1fr); } }
+  .dish-card { display: grid; width: 100%; text-align: left; border-radius: var(--radius-lg); overflow: hidden; background: var(--c-white); box-shadow: 0 1px 0 var(--c-line), 0 20px 36px -30px rgb(27 26 25 / 0.5); transition: transform 200ms var(--ease), box-shadow 200ms var(--ease); }
+  .dish-card:hover { transform: translateY(-3px); box-shadow: 0 1px 0 var(--c-line), 0 26px 40px -28px rgb(27 26 25 / 0.55); }
+  .dish-card__photo { display: block; aspect-ratio: 4 / 3; border-radius: 0; }
+  .dish-card__photo :global(img) { transition: transform 500ms var(--ease); }
+  .dish-card:hover .dish-card__photo :global(img) { transform: scale(1.03); }
+  .dish-card__body { display: grid; gap: 0.15rem; padding: 0.85rem 1rem 1rem; }
+  .dish-card__name { font-family: var(--font-display); font-weight: 750; font-size: 1.1rem; line-height: 1.2; }
+  .dish-card__meta { color: var(--c-ink-soft); font-size: 0.9rem; }
+  .highlights__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 2.25rem; }
+  .highlights__note { text-align: center; margin-top: 1rem; max-width: 60ch; margin-inline: auto; }
+  @media (prefers-reduced-motion: reduce) { .dish-card, .dish-card:hover, .dish-card__photo :global(img) { transition: none; transform: none; } }
+
+  /* Proof */
+  .proof__grid { display: grid; gap: 2rem; align-items: start; }
+  @media (min-width: 64rem) { .proof__grid { grid-template-columns: 1fr 2.2fr; gap: 3rem; } }
+  .proof__score { display: inline-flex; align-items: baseline; gap: 0.4rem; font-size: clamp(2.6rem, 5vw, 4rem); color: var(--c-navy); margin-block: 0.4rem 0.25rem; }
+  .proof__score :global(svg) { width: 0.7em; height: 0.7em; color: var(--c-amber); align-self: center; }
+  .proof__of { font-size: 0.45em; color: var(--c-ink-soft); font-weight: 600; }
+  .quotes { display: grid; gap: 1rem; }
+  @media (min-width: 48rem) { .quotes { grid-template-columns: repeat(3, 1fr); } }
+  .quote { background: var(--c-white); border: 1px solid var(--c-line); border-radius: var(--radius-lg); padding: 1.25rem; display: grid; gap: 0.75rem; align-content: space-between; }
+  .quote blockquote { margin: 0; font-size: 1.05rem; line-height: 1.5; text-wrap: pretty; }
+
+  /* Visit */
+  .visit__grid { display: grid; gap: 2.5rem; }
+  @media (min-width: 60rem) { .visit__grid { grid-template-columns: 1.2fr 1fr; gap: 4rem; } }
+  .visit__title { margin-block: 0.6rem 1rem; font-size: clamp(2.2rem, 5vw, 4rem); }
+  .visit__address { font-size: 1.15rem; line-height: 1.5; }
+  .visit__actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.25rem; }
+  .visit__parking { margin-top: 1rem; }
+  .visit__h3 { display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+  .visit__h3 :global(svg) { width: 1.2rem; height: 1.2rem; color: var(--c-red); }
+
+  /* CTA */
+  .cta__inner { display: grid; gap: 1.5rem; align-items: center; padding: clamp(1.75rem, 4vw, 3rem); border-radius: var(--radius-lg); background: var(--c-white); border: 1px solid var(--c-line); box-shadow: var(--shadow); }
+  @media (min-width: 60rem) { .cta__inner { grid-template-columns: 1.3fr 1fr; } .cta__actions { justify-content: flex-end; } }
+  .cta__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+</style>

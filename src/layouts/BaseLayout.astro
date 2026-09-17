@@ -1,0 +1,184 @@
+---
+import { withBase } from '@lib/paths';
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import type { TransitionDirectionalAnimations } from 'astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+import StickyOrderBar from '@components/StickyOrderBar.astro';
+import PhotoViewer from '@components/PhotoViewer.astro';
+import { business } from '@data/business';
+
+export interface Props {
+  title: string;
+  description: string;
+  jsonLd?: Record<string, unknown>[];
+}
+const { title, description, jsonLd = [] } = Astro.props;
+const fullTitle = title === business.name ? `${business.name} · Mongolian BBQ in Simi Valley, CA` : `${title} · ${business.name}`;
+
+// Absolute URLs only exist once the owner confirms a domain (SITE_URL). Until then they are omitted.
+const site = Astro.site;
+const canonical = site ? new URL(Astro.url.pathname, site).href : undefined;
+const ogImage = site ? new URL(withBase('/img/place/exterior-evening.jpg'), site).href : undefined;
+
+/**
+ * Page-to-page transition (Astro ClientRouter): the old page fades out in 140 ms while the new page
+ * fades in and rises 12 px over 320 ms. The header persists across navigations. Direct links and the
+ * browser Back button use the same router (history is native). Astro skips the animation entirely under
+ * prefers-reduced-motion, and global.css neutralises ::view-transition pseudo-elements as a second guard.
+ */
+const pageTransition: TransitionDirectionalAnimations = {
+  forwards: {
+    old: { name: 'fmb-page-out', duration: '0.14s', easing: 'ease-in', fillMode: 'forwards' },
+    new: { name: 'fmb-page-in', duration: '0.32s', easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)', fillMode: 'backwards' },
+  },
+  backwards: {
+    old: { name: 'fmb-page-out', duration: '0.14s', easing: 'ease-in', fillMode: 'forwards' },
+    new: { name: 'fmb-page-in-back', duration: '0.32s', easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)', fillMode: 'backwards' },
+  },
+};
+
+const restaurantLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Restaurant',
+  name: business.name,
+  description: business.description,
+  servesCuisine: business.cuisine,
+  telephone: business.phone.e164,
+  priceRange: '$$',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: `${business.address.street} ${business.address.unit}`,
+    addressLocality: business.address.city,
+    addressRegion: business.address.region,
+    postalCode: business.address.postalCode,
+    addressCountry: business.address.country,
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: business.geo.latitude, longitude: business.geo.longitude },
+  openingHoursSpecification: business.hours
+    .filter((h) => h.opens)
+    .map((h) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: h.day, opens: h.opens, closes: h.closes })),
+  hasMenu: site ? new URL(withBase('/menu/'), site).href : withBase('/menu/'),
+  ...(site ? { url: new URL(withBase('/'), site).href, image: ogImage } : {}),
+  potentialAction: [{ '@type': 'OrderAction', name: 'Order on DoorDash', target: { '@type': 'EntryPoint', urlTemplate: business.order.doordash.url } }],
+};
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta name="theme-color" content="#1c3563" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <meta name="geo.region" content="US-CA" />
+    <meta name="geo.placename" content="Simi Valley" />
+    <meta name="geo.position" content={`${business.geo.latitude};${business.geo.longitude}`} />
+    <meta property="og:type" content="restaurant.restaurant" />
+    <meta property="og:site_name" content={business.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="en_US" />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <ClientRouter />
+    <script is:inline>document.documentElement.classList.remove('no-js');</script>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(restaurantLd)} />
+    {jsonLd.map((obj) => <script is:inline type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header transition:persist="site-header" />
+    <main id="main" tabindex="-1" transition:animate={pageTransition}>
+      <slot />
+    </main>
+    <Footer />
+    <StickyOrderBar />
+    <PhotoViewer />
+
+    <script>
+      const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // 1) Reveal-on-scroll: fade-and-rise as blocks enter; siblings stagger via --i (CSS).
+      const initReveal = () => {
+        const els = document.querySelectorAll<HTMLElement>('[data-reveal]:not(.is-visible)');
+        if (!els.length) return;
+        if (reduce() || !('IntersectionObserver' in window)) { els.forEach((el) => el.classList.add('is-visible')); return; }
+        const io = new IntersectionObserver(
+          (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } }),
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+        );
+        els.forEach((el) => io.observe(el));
+        setTimeout(() => els.forEach((el) => el.classList.add('is-visible')), 2500); // never leave content hidden
+      };
+
+      // 2) Desktop-only parallax: [data-parallax] images drift a few px against scroll while on screen.
+      const parallaxEls = new Set<HTMLElement>();
+      let parallaxTimer: number | undefined;
+      const parallaxTick = () => {
+        parallaxTimer = undefined;
+        if (window.innerWidth < 1024 || reduce()) { parallaxEls.forEach((el) => el.style.setProperty('--py', '0px')); return; }
+        const vh = window.innerHeight;
+        parallaxEls.forEach((el) => {
+          const r = (el.parentElement || el).getBoundingClientRect();
+          const center = r.top + r.height / 2 - vh / 2;
+          const factor = Number(el.dataset.parallax || 0.06);
+          const y = Math.max(-26, Math.min(26, -center * factor));
+          el.style.setProperty('--py', `${y.toFixed(1)}px`);
+        });
+      };
+      const onScroll = () => { if (parallaxTimer === undefined && parallaxEls.size) parallaxTimer = window.setTimeout(parallaxTick, 16); };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
+      const initParallax = () => {
+        parallaxEls.clear();
+        if (!('IntersectionObserver' in window) || reduce()) return;
+        const all = document.querySelectorAll<HTMLElement>('[data-parallax]');
+        if (!all.length) return;
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => { const el = e.target as HTMLElement; if (e.isIntersecting) parallaxEls.add(el); else parallaxEls.delete(el); });
+          parallaxTick();
+        }, { rootMargin: '10% 0px' });
+        all.forEach((el) => io.observe(el));
+      };
+
+      // 3) "Open now" status — computed in the restaurant's timezone; text, never color alone.
+      const initStatus = () => {
+        const statusEls = document.querySelectorAll<HTMLElement>('[data-open-status]');
+        if (!statusEls.length) return;
+        const hours: Array<{ iso: number; opens: string | null; closes: string | null; day: string }> = JSON.parse(statusEls[0].dataset.hours || '[]');
+        const tz = statusEls[0].dataset.tz || 'America/Los_Angeles';
+        const parts = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+        const get = (t: string) => parts.find((p) => p.type === t)?.value || '';
+        const isoOf: Record<string, number> = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
+        const iso = isoOf[get('weekday')] || 0;
+        const mins = (parseInt(get('hour'), 10) % 24) * 60 + parseInt(get('minute'), 10);
+        const toMins = (s: string) => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+        const fmt = (s: string) => { const [h, m] = s.split(':').map(Number); const ap = h >= 12 ? 'PM' : 'AM'; const hh = ((h + 11) % 12) + 1; return m ? `${hh}:${String(m).padStart(2, '0')} ${ap}` : `${hh} ${ap}`; };
+        const today = hours.find((h) => h.iso === iso);
+        let text = '';
+        if (today && today.opens && today.closes && mins >= toMins(today.opens) && mins < toMins(today.closes)) {
+          text = `Open now · closes ${fmt(today.closes)}`;
+        } else {
+          for (let i = 0; i < 7; i++) {
+            const d = hours.find((h) => h.iso === ((iso - 1 + i) % 7) + 1);
+            if (!d || !d.opens) continue;
+            if (i === 0 && mins < toMins(d.opens)) { text = `Closed now · opens today at ${fmt(d.opens)}`; break; }
+            if (i > 0) { text = `Closed now · opens ${i === 1 ? 'tomorrow' : d.day} at ${fmt(d.opens)}`; break; }
+          }
+        }
+        statusEls.forEach((el) => { if (text) { el.textContent = text; el.hidden = false; } });
+        document.querySelectorAll<HTMLElement>('[data-hours-row]').forEach((row) => { if (Number(row.dataset.hoursRow) === iso) row.setAttribute('aria-current', 'date'); });
+      };
+
+      document.addEventListener('astro:page-load', () => { initReveal(); initParallax(); initStatus(); });
+    </script>
+  </body>
+</html>

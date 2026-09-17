@@ -1,0 +1,22 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Icon from '@components/Icons.astro';
+import { withBase } from '@lib/paths';
+import { business } from '@data/business';
+---
+<BaseLayout title="Page not found" description="That page does not exist. Head back to the Family Mongolian BBQ home page or view the menu.">
+  <section class="section container nf">
+    <p class="eyebrow">404</p>
+    <h1>That plate isn't on the menu.</h1>
+    <p class="lede">The page you're looking for doesn't exist. Try the menu or head home.</p>
+    <div class="nf__actions">
+      <a class="btn btn--primary" href={withBase('/')}>Home</a>
+      <a class="btn btn--secondary" href={withBase('/menu/')}>View Menu <Icon name="arrow" /></a>
+      <a class="btn btn--secondary" href={business.order.doordash.url} target="_blank" rel="noopener">Order Online</a>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .nf { display: grid; gap: 1rem; min-height: 50vh; align-content: center; }
+  .nf__actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.5rem; }
+</style>

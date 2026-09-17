@@ -1,0 +1,21 @@
+---
+import { business } from '@data/business';
+export interface Props { caption?: string; showStatus?: boolean }
+const { caption = 'Hours', showStatus = true } = Astro.props;
+---
+<div class="hours-block">
+  {showStatus && <p class="hours-block__status" data-open-status data-hours={JSON.stringify(business.hours)} data-tz={business.timezone} hidden></p>}
+  <table class="hours">
+    <caption class="visually-hidden">{caption}</caption>
+    <tbody>
+      {business.hours.map((h) => (
+        <tr data-hours-row={h.iso}><th scope="row">{h.day}</th><td>{h.display}</td></tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="small muted hours-block__note">{business.orderingCutoffNote}</p>
+</div>
+<style>
+  .hours-block__status { font-weight: 700; margin-bottom: 0.75rem; }
+  .hours-block__note { margin-top: 0.75rem; }
+</style>

@@ -1,0 +1,128 @@
+---
+/**
+ * Home hero — the official hero video, autoplaying silently and looping.
+ *
+ * Source: assets-master/owner/FMB hero vid.mp4 (6.73 s, 3832×2160, 30 fps). Its last frame (dining room)
+ * differs from its first (parking lot), so a plain loop would hard-cut. The web derivatives
+ * (public/media/hero-loop-1080.mp4, hero-loop-720.mp4) keep every frame of the approved clip and add a
+ * 0.7 s dissolve from the final frames back to the clip's own first frame, so `loop` restarts on an
+ * identical frame. No scene content was regenerated or altered.
+ *
+ * Markup carries autoplay / muted / loop / playsinline. The poster (first frame) fills the box before any
+ * video byte arrives and stays as the static fallback when autoplay is unavailable, JS is off, or the
+ * visitor prefers reduced motion / data saving. No visible controls. Playback pauses while offscreen.
+ */
+import { withBase } from '@lib/paths';
+import { business } from '@data/business';
+import Wordmark from './Wordmark.astro';
+import Icon from './Icons.astro';
+const sources = { mp41080: withBase('/media/hero-loop-1080.mp4'), mp4720: withBase('/media/hero-loop-720.mp4') };
+const poster = withBase('/media/hero-poster.jpg');
+const posterSm = withBase('/media/hero-poster-960.jpg');
+---
+<section class="hero on-dark" aria-labelledby="hero-title">
+  <div class="hero__media" aria-hidden="true">
+    <picture class="hero__poster">
+      <source media="(max-width: 700px)" srcset={posterSm} />
+      <img src={poster} width="1920" height="1082" alt="" loading="eager" fetchpriority="high" decoding="async" />
+    </picture>
+    <video
+      class="hero__video"
+      data-hero-video
+      data-sources={JSON.stringify(sources)}
+      poster={poster}
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="none"
+      disablepictureinpicture
+      tabindex="-1"
+    ></video>
+    <div class="hero__scrim"></div>
+  </div>
+
+  <div class="container hero__content">
+    <p class="eyebrow hero__eyebrow" data-reveal>Simi Valley, CA · Since {business.since}</p>
+    <h1 class="hero__title" id="hero-title" data-reveal style="--i: 1">
+      <span class="visually-hidden">{business.name}</span>
+      <Wordmark size="lg" onDark />
+    </h1>
+    <p class="hero__lede" data-reveal style="--i: 2">
+      Build your own bowl — noodles, sliced meats, fresh vegetables and house sauces — and we grill it fresh. Or order the full Chinese menu for pickup and delivery.
+    </p>
+    <div class="hero__actions" data-reveal style="--i: 3">
+      <a class="btn btn--primary btn--lg" href={business.order.doordash.url} target="_blank" rel="noopener"><Icon name="bag" /> Order Online</a>
+      <a class="btn btn--secondary-light btn--lg" href={withBase('/menu/')}>View Menu <Icon name="arrow" /></a>
+    </div>
+    <p class="hero__status" data-open-status data-hours={JSON.stringify(business.hours)} data-tz={business.timezone} hidden></p>
+    <p class="hero__hours">Sun – Thu 11 AM – 9 PM · Fri – Sat 11 AM – 9:30 PM</p>
+  </div>
+  <p class="visually-hidden">Background: a short silent video looping from the Tapo Street parking lot at dusk, through the front door, into the dining room.</p>
+</section>
+<div data-hero-end aria-hidden="true"></div>
+
+<style>
+  .hero {
+    position: relative; isolation: isolate; overflow: hidden;
+    min-height: min(90svh, 58rem); display: grid; align-items: end;
+    background: var(--c-navy-deep); color: var(--c-white);
+  }
+  .hero__media { position: absolute; inset: 0; z-index: -1; }
+  .hero__poster, .hero__poster img, .hero__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 42%; }
+  .hero__video { opacity: 0; transition: opacity 600ms ease; pointer-events: none; }
+  .hero__video::-webkit-media-controls { display: none !important; }
+  .hero__video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+  .hero__video.is-playing { opacity: 1; }
+  .hero__scrim {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(to right, rgb(19 38 74 / 0.72) 0%, rgb(19 38 74 / 0.45) 45%, rgb(19 38 74 / 0.05) 100%),
+      linear-gradient(to top, rgb(19 38 74 / 0.94) 0%, rgb(19 38 74 / 0.7) 30%, rgb(19 38 74 / 0.15) 62%, rgb(19 38 74 / 0.3) 100%);
+  }
+  .hero__content { position: relative; padding-block: clamp(3rem, 8vw, 6rem) clamp(2.5rem, 6vw, 4.5rem); display: grid; gap: 1rem; max-width: 64rem; }
+  .hero__eyebrow { color: var(--c-amber); }
+  .hero__title { line-height: 1; text-shadow: 0 2px 26px rgb(0 0 0 / 0.4); }
+  .hero__lede { max-width: 44ch; font-size: clamp(1.08rem, 1.6vw, 1.3rem); color: #eef1f7; text-wrap: pretty; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.4rem; }
+  .hero__status { font-weight: 650; color: #ffe1a6; margin-top: 0.4rem; }
+  .hero__status:not([hidden]) + .hero__hours { display: none; }
+  .hero__hours { color: #c9d2e4; font-size: 0.95rem; }
+  @media (prefers-reduced-motion: reduce) { .hero__video { display: none; } }
+</style>
+
+<script>
+  const initHero = () => {
+    const video = document.querySelector<HTMLVideoElement>('[data-hero-video]');
+    if (!video || video.dataset.ready) return;
+    video.dataset.ready = '1';
+
+    // Gates: motion preference and data saving keep the poster. Nothing else blocks playback.
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const conn = (navigator as any).connection as { saveData?: boolean; effectiveType?: string } | undefined;
+    const saveData = Boolean(conn && (conn.saveData || /(^|[^3-9])2g/.test(conn.effectiveType || '')));
+    if (reduceMotion || saveData) { video.removeAttribute('autoplay'); return; }
+
+    const src = JSON.parse(video.dataset.sources || '{}') as Record<string, string>;
+    const url = window.innerWidth >= 900 ? src.mp41080 : src.mp4720;
+    if (!url || !video.canPlayType('video/mp4')) return; // poster stays
+    const s = document.createElement('source'); s.src = url; s.type = 'video/mp4'; video.appendChild(s);
+
+    // Mobile autoplay policy: muted (attribute AND property), inline, started by the page.
+    video.muted = true; video.defaultMuted = true; video.setAttribute('muted', ''); video.setAttribute('playsinline', '');
+    video.preload = 'auto'; video.load();
+    const play = () => { video.muted = true; video.play().catch(() => { /* blocked: poster stays, no controls */ }); };
+    video.addEventListener('playing', () => video.classList.add('is-playing'), { once: true });
+    video.addEventListener('error', () => video.classList.remove('is-playing'), { once: true });
+    play();
+    video.addEventListener('canplay', () => { if (video.paused) play(); }, { once: true });
+
+    // Pause offscreen and when the tab is hidden; resume when visible.
+    const io = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { if (video.paused) play(); } else if (!video.paused) video.pause();
+    }, { threshold: 0.1 }) : null;
+    io?.observe(video);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) video.pause(); else play(); });
+  };
+  document.addEventListener('astro:page-load', initHero);
+</script>

@@ -1,0 +1,75 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import MenuList from '@components/MenuList.astro';
+import Icon from '@components/Icons.astro';
+import { business } from '@data/business';
+import { menu } from '@data/menu';
+import { portraits, portraitFull } from '@data/portraits';
+import { withBase } from '@lib/paths';
+
+const menuLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Menu',
+  name: `${business.name} menu`,
+  hasMenuSection: menu.map((c) => ({
+    '@type': 'MenuSection',
+    name: c.name,
+    hasMenuItem: c.items.map((i) => ({
+      '@type': 'MenuItem',
+      name: i.name,
+      ...(i.description ? { description: i.description } : {}),
+      offers: { '@type': 'Offer', price: i.price, priceCurrency: 'USD', description: 'Starting pickup price via online ordering' },
+    })),
+  })),
+};
+// Title composition: two confirmed portraits overlap the headline's edge (Orange Chicken, Walnut Shrimp).
+const a = portraits['orange-chicken'];
+const b = portraits['walnut-shrimp'];
+---
+<BaseLayout title="Menu" description={`Full menu for ${business.name} in Simi Valley: appetizers, chef's specials, chicken, beef, pork, seafood, egg foo young, soups, rice and noodles. Pickup and delivery.`} jsonLd={[menuLd]}>
+  <section class="menu-hero section--cream editorial" aria-labelledby="menu-h1">
+    <span class="ghost menu-hero__ghost" aria-hidden="true">Wok</span>
+    <div class="container menu-hero__grid">
+      <div class="menu-hero__copy">
+        <p class="eyebrow" data-reveal>The full menu · Pickup &amp; delivery</p>
+        <h1 class="editorial__title menu-hero__title" id="menu-h1" data-reveal style="--i: 1">Wok-fired on <em>Tapo Street</em> since {business.since}.</h1>
+        <p class="lede" data-reveal style="--i: 2">Appetizers, chef's specials, chicken, beef, pork, seafood, egg foo young, soups, rice and noodles, cooked to order. The Mongolian BBQ grill is a dine-in experience; <a class="link" href={withBase('/#grill')}>see how it works</a>.</p>
+        <div class="menu-hero__actions" data-reveal style="--i: 3">
+          <a class="btn btn--primary" href={business.order.doordash.url} target="_blank" rel="noopener"><Icon name="bag" /> Order Online</a>
+          <a class="btn btn--secondary" href={`tel:${business.phone.e164}`}><Icon name="phone" /> {business.phone.display}</a>
+        </div>
+        <p class="menu-hero__note small muted" data-reveal style="--i: 4">Most entrées come as a meal for 1–2 with steamed rice; party sizes (serves 8–10) are available on DoorDash. Prices can change; the ordering page always shows the current price.</p>
+      </div>
+      <div class="menu-hero__art" aria-hidden="true">
+        <img class="menu-hero__img menu-hero__img--a photo" src={withBase(portraitFull(a.id, 600))} width="600" height="1066" alt="" loading="eager" decoding="async" data-reveal style="--i: 2" data-parallax="0.05" />
+        <img class="menu-hero__img menu-hero__img--b photo" src={withBase(portraitFull(b.id, 600))} width="600" height="1066" alt="" loading="lazy" decoding="async" data-reveal style="--i: 4" data-parallax="-0.04" />
+      </div>
+    </div>
+  </section>
+  <MenuList />
+</BaseLayout>
+
+<style>
+  .menu-hero { padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 5vw, 3.5rem); overflow: hidden; }
+  .menu-hero__ghost { left: -0.04em; top: -0.05em; }
+  .menu-hero__grid { position: relative; z-index: 1; display: grid; gap: 2rem; }
+  .menu-hero__copy { display: grid; gap: 1rem; align-content: center; }
+  .menu-hero__title { max-width: 12ch; }
+  .menu-hero__actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.4rem; }
+  .menu-hero__note { max-width: 46ch; }
+  .menu-hero__art { position: relative; display: none; }
+  .menu-hero__img { position: absolute; border-radius: var(--radius-lg); box-shadow: var(--shadow); object-fit: cover; }
+  @media (min-width: 60rem) {
+    .menu-hero__grid { grid-template-columns: 1.15fr 1fr; align-items: center; min-height: 34rem; }
+    .menu-hero__art { display: block; height: 100%; min-height: 34rem; }
+    /* The headline's right edge tucks under the first plate; the second plate hangs off the section edge. */
+    .menu-hero__title { max-width: 11ch; margin-right: -3rem; position: relative; z-index: 2; }
+    .menu-hero__img--a { width: 58%; aspect-ratio: 941 / 1300; left: 0; top: 0; z-index: 1; object-position: center 40%; }
+    .menu-hero__img--b { width: 50%; aspect-ratio: 941 / 1200; right: -6%; bottom: -4%; z-index: 0; object-position: center 45%; }
+  }
+  @media (max-width: 59.99rem) {
+    .menu-hero__art { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; min-height: 0; }
+    .menu-hero__img { position: static; width: 100%; aspect-ratio: 4 / 5; }
+    .menu-hero__img--b { margin-top: 2rem; }
+  }
+</style>

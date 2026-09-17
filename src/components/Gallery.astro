@@ -1,0 +1,111 @@
+---
+/**
+ * Interactive gallery — a horizontal, scroll-snapping track of approved photographs.
+ *  - Touch: native horizontal scroll with snap. Mouse: click-drag on the track (pointer events).
+ *  - Controls: Previous / Next buttons scroll one card; arrow keys work when the track is focused.
+ *  - Each card is a <button> that opens the shared PhotoViewer (Escape / arrows / Close).
+ *  - No auto-rotation. Original proportions are kept: cards have a fixed height and natural width.
+ * Without JS the track is still a scrollable row of images.
+ */
+import { withBase } from '@lib/paths';
+import Icon from './Icons.astro';
+
+export interface Slide { src: string; full: string; alt: string; caption: string; w: number; h: number }
+export interface Props { slides: Slide[]; label: string; group: string }
+const { slides, label, group } = Astro.props;
+---
+<div class="gallery" data-gallery>
+  <div class="gallery__bar">
+    <p class="small muted gallery__hint" data-gallery-hint>Drag, swipe, or use the arrows. Tap a photo to enlarge it.</p>
+    <div class="gallery__controls">
+      <button class="gallery__btn" type="button" data-gallery-prev aria-label="Scroll gallery left"><Icon name="arrow" /></button>
+      <button class="gallery__btn" type="button" data-gallery-next aria-label="Scroll gallery right"><Icon name="arrow" /></button>
+    </div>
+  </div>
+  <ul class="gallery__track" data-gallery-track tabindex="0" aria-label={label}>
+    {slides.map((s, i) => (
+      <li class="gallery__item" style={`--ar: ${s.w} / ${s.h}`} data-reveal style:--i={String(i)}>
+        <button class="gallery__card" type="button" data-viewer-src={withBase(s.full)} data-viewer-alt={s.alt} data-viewer-caption={s.caption} data-viewer-group={group} aria-label={`Enlarge: ${s.caption}`}>
+          <img src={withBase(s.src)} width={s.w} height={s.h} alt={s.alt} loading="lazy" decoding="async" draggable="false" />
+          <span class="gallery__cap">{s.caption}</span>
+        </button>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .gallery { display: grid; gap: 0.9rem; }
+  .gallery__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .gallery__controls { display: flex; gap: 0.5rem; }
+  .gallery__btn { width: 2.75rem; height: 2.75rem; display: grid; place-items: center; border-radius: 999px; border: 2px solid var(--c-navy); color: var(--c-navy); background: var(--c-white); }
+  .gallery__btn svg { width: 1.1rem; height: 1.1rem; }
+  [data-gallery-prev] svg { transform: rotate(180deg); }
+  .gallery__btn:hover { background: var(--c-navy); color: var(--c-white); }
+  .gallery__btn[disabled] { opacity: 0.35; cursor: default; }
+  .gallery__track {
+    display: flex; gap: 0.9rem; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+    padding: 0.25rem 0 0.9rem; scrollbar-width: thin; scrollbar-color: var(--c-line) transparent; -webkit-overflow-scrolling: touch;
+    cursor: grab; scroll-padding-inline: 0.25rem;
+  }
+  .gallery__track.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+  .gallery__track:focus-visible { outline: 3px solid var(--c-navy); outline-offset: 4px; border-radius: var(--radius); }
+  .gallery__item { flex: 0 0 auto; height: clamp(15rem, 40vw, 26rem); aspect-ratio: var(--ar); scroll-snap-align: start; }
+  .gallery__card { position: relative; display: block; width: 100%; height: 100%; border-radius: var(--radius-lg); overflow: hidden; background: var(--c-marble-2); box-shadow: 0 1px 0 var(--c-line); }
+  .gallery__card img { width: 100%; height: 100%; object-fit: cover; transition: transform 500ms var(--ease); user-select: none; -webkit-user-drag: none; }
+  .gallery__card:hover img { transform: scale(1.025); }
+  .gallery__card:focus-visible { outline: 3px solid var(--c-red); outline-offset: 3px; }
+  .gallery__cap { position: absolute; left: 0.75rem; bottom: 0.75rem; padding: 0.3rem 0.7rem; border-radius: 999px; background: rgb(19 38 74 / 0.78); color: var(--c-white); font-size: 0.8rem; font-weight: 600; max-width: calc(100% - 1.5rem); text-align: left; }
+  @media (prefers-reduced-motion: reduce) { .gallery__card img, .gallery__card:hover img { transition: none; transform: none; } .gallery__track { scroll-behavior: auto; } }
+  @media (max-width: 40rem) { .gallery__hint { font-size: 0.85rem; } }
+</style>
+
+<script>
+  const initGalleries = () => {
+    document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((g) => {
+      if (g.dataset.ready) return; g.dataset.ready = '1';
+      const track = g.querySelector<HTMLElement>('[data-gallery-track]')!;
+      const prev = g.querySelector<HTMLButtonElement>('[data-gallery-prev]')!;
+      const next = g.querySelector<HTMLButtonElement>('[data-gallery-next]')!;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const step = () => { const first = track.querySelector<HTMLElement>('.gallery__item'); return first ? first.getBoundingClientRect().width + 14 : track.clientWidth * 0.8; };
+      const scrollBy = (dir: number) => track.scrollBy({ left: dir * step(), behavior: reduce ? 'auto' : 'smooth' });
+      prev.addEventListener('click', () => scrollBy(-1));
+      next.addEventListener('click', () => scrollBy(1));
+      const updateButtons = () => {
+        prev.disabled = track.scrollLeft <= 2;
+        next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+      };
+      track.addEventListener('scroll', updateButtons, { passive: true });
+      window.addEventListener('resize', updateButtons);
+      updateButtons();
+      track.addEventListener('keydown', (e) => {
+        if (e.target !== track) return; // let card buttons handle their own keys
+        if (e.key === 'ArrowRight') { e.preventDefault(); scrollBy(1); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); scrollBy(-1); }
+      });
+
+      // Mouse drag-to-scroll. Touch keeps native scrolling. A drag longer than 6px suppresses the click.
+      let down = false, startX = 0, startLeft = 0, moved = false;
+      track.addEventListener('pointerdown', (e) => {
+        if (e.pointerType !== 'mouse' || e.button !== 0) return;
+        down = true; moved = false; startX = e.clientX; startLeft = track.scrollLeft;
+        track.setPointerCapture(e.pointerId);
+      });
+      track.addEventListener('pointermove', (e) => {
+        if (!down) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 6) { moved = true; track.classList.add('is-dragging'); }
+        if (moved) track.scrollLeft = startLeft - dx;
+      });
+      const end = (e: PointerEvent) => {
+        if (!down) return; down = false;
+        track.classList.remove('is-dragging');
+        try { track.releasePointerCapture(e.pointerId); } catch { /* already released */ }
+      };
+      track.addEventListener('pointerup', end); track.addEventListener('pointercancel', end);
+      track.addEventListener('click', (e) => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+    });
+  };
+  document.addEventListener('astro:page-load', initGalleries);
+</script>

@@ -1,0 +1,70 @@
+---
+/**
+ * Dish spotlight — an accessible <dialog> that opens from a highlight card and shows the full photo,
+ * name, description and contextualized price. One dialog on the page; content is swapped from the
+ * card's data attributes. Escape / backdrop / Close all dismiss; focus returns to the opener.
+ */
+import Icon from './Icons.astro';
+import { business } from '@data/business';
+---
+<dialog class="dish" id="dish-dialog" aria-labelledby="dish-title">
+  <div class="dish__inner">
+    <button class="dish__close" type="button" data-dish-close aria-label="Close"><Icon name="close" /></button>
+    <div class="dish__photo photo"><img data-dish-img alt="" width="1600" height="1200" decoding="async" /></div>
+    <div class="dish__body">
+      <p class="eyebrow" data-dish-cat></p>
+      <h2 class="dish__title" id="dish-title" data-dish-name></h2>
+      <p class="dish__desc muted" data-dish-desc></p>
+      <p class="dish__price"><span data-dish-price></span> <span class="small muted">pickup, from</span></p>
+      <div class="dish__actions">
+        <a class="btn btn--primary" href={business.order.doordash.url} target="_blank" rel="noopener"><Icon name="bag" /> Order on DoorDash</a>
+      </div>
+      <p class="small muted">DoorDash delivery prices differ from pickup. Dine-in pricing may vary.</p>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .dish { border: 0; padding: 0; background: transparent; max-width: min(96vw, 60rem); width: 100%; }
+  .dish::backdrop { background: rgb(19 38 74 / 0.55); backdrop-filter: blur(3px); }
+  .dish__inner { position: relative; display: grid; background: var(--c-marble); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+  @media (min-width: 48rem) { .dish__inner { grid-template-columns: 1.15fr 1fr; } }
+  .dish__photo { border-radius: 0; aspect-ratio: 4 / 3; }
+  .dish__close { position: absolute; top: 0.6rem; right: 0.6rem; width: 2.75rem; height: 2.75rem; display: grid; place-items: center; border-radius: 999px; background: rgb(250 248 244 / 0.92); color: var(--c-ink); box-shadow: 0 4px 14px -6px rgb(0 0 0 / 0.4); z-index: 1; }
+  .dish__close svg { width: 1.2rem; height: 1.2rem; }
+  .dish__body { padding: clamp(1.25rem, 3vw, 2rem); display: grid; gap: 0.7rem; align-content: center; }
+  .dish__title { font-size: clamp(1.6rem, 3vw, 2.2rem); }
+  .dish__price { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; }
+  .dish__actions { margin-top: 0.4rem; }
+  .dish[open] { animation: dish-in 220ms var(--ease); }
+  @keyframes dish-in { from { opacity: 0; transform: translateY(8px); } }
+  @media (prefers-reduced-motion: reduce) { .dish[open] { animation: none; } }
+</style>
+
+<script>
+  const initDish = () => {
+    const dlg = document.getElementById('dish-dialog') as HTMLDialogElement | null;
+    if (!dlg || dlg.dataset.ready || typeof dlg.showModal !== 'function') return;
+    dlg.dataset.ready = '1';
+    const img = dlg.querySelector<HTMLImageElement>('[data-dish-img]')!;
+    const name = dlg.querySelector<HTMLElement>('[data-dish-name]')!;
+    const cat = dlg.querySelector<HTMLElement>('[data-dish-cat]')!;
+    const desc = dlg.querySelector<HTMLElement>('[data-dish-desc]')!;
+    const price = dlg.querySelector<HTMLElement>('[data-dish-price]')!;
+    let opener: HTMLElement | null = null;
+    document.querySelectorAll<HTMLElement>('[data-dish]').forEach((card) => {
+      card.addEventListener('click', () => {
+        opener = card;
+        img.src = card.dataset.dishImg || ''; img.alt = card.dataset.dishAlt || '';
+        name.textContent = card.dataset.dishName || ''; cat.textContent = card.dataset.dishCat || '';
+        desc.textContent = card.dataset.dishDesc || ''; desc.hidden = !card.dataset.dishDesc;
+        price.textContent = card.dataset.dishPrice ? `$${card.dataset.dishPrice}` : '';
+        dlg.showModal();
+      });
+    });
+    dlg.querySelector('[data-dish-close]')?.addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener('close', () => opener?.focus());
+  };
+  document.addEventListener('astro:page-load', initDish);
+</script>

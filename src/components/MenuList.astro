@@ -1,0 +1,136 @@
+---
+/**
+ * Full menu as readable, responsive HTML with a sticky category navigation and owner photographs.
+ *  - Items with a CONFIRMED portrait photo (see src/data/portraits.ts) show a square thumbnail on the left,
+ *    cropped around the plate from the 941×1672 portrait, served at 240/480 px and lazy-loaded.
+ *    The thumbnail opens the full portrait in the shared PhotoViewer.
+ *  - Items without a confirmed photo simply have no thumbnail (nothing is inferred from file names).
+ *  - Scroll-spy highlights the current category; links are plain anchors so everything works without JS.
+ */
+import { withBase } from '@lib/paths';
+import { menu, pricingDisclosure } from '@data/menu';
+import { portraits, portraitFull, portraitSquare } from '@data/portraits';
+import Icon from './Icons.astro';
+---
+<nav class="menu-nav" aria-label="Menu categories" data-menu-nav>
+  <ul class="menu-nav__list container">
+    {menu.map((c) => (<li><a class="menu-nav__link" href={`#${c.id}`} data-menu-link={c.id}>{c.name}</a></li>))}
+  </ul>
+</nav>
+
+<div class="container menu-body">
+  <p class="menu-body__disclosure small muted">{pricingDisclosure}</p>
+  {menu.map((c) => (
+    <section class="menu-cat" id={c.id} aria-labelledby={`${c.id}-h`} data-menu-cat={c.id}>
+      <div class="menu-cat__head" data-reveal>
+        <h2 id={`${c.id}-h`}>{c.name}</h2>
+        {c.intro && <p class="muted">{c.intro}</p>}
+      </div>
+      <ul class="menu-items">
+        {c.items.map((i, idx) => {
+          const p = i.portrait ? portraits[i.portrait] : undefined;
+          const hasPhoto = Boolean(p && p.match === 'confirmed' && p.square);
+          return (
+            <li class:list={['menu-item', { 'menu-item--photo': hasPhoto }]} id={`item-${i.code.toLowerCase()}`} data-reveal style={`--i: ${idx % 6}`}>
+              {hasPhoto && p && (
+                <button
+                  class="menu-item__thumb"
+                  type="button"
+                  data-viewer-src={withBase(portraitFull(p.id, 941))}
+                  data-viewer-alt={p.alt}
+                  data-viewer-caption={`${i.code} ${i.name}`}
+                  aria-label={`Enlarge photo of ${i.name}`}
+                >
+                  <img
+                    src={withBase(portraitSquare(p.id, 240))}
+                    srcset={`${withBase(portraitSquare(p.id, 240))} 240w, ${withBase(portraitSquare(p.id, 480))} 480w`}
+                    sizes="(min-width: 60rem) 6.5rem, 5.5rem"
+                    width="480" height="480" alt={p.alt} loading="lazy" decoding="async"
+                  />
+                </button>
+              )}
+              <div class="menu-item__text">
+                <div class="menu-item__row">
+                  <h3 class="menu-item__name"><span class="menu-item__code">{i.code}</span> {i.name}</h3>
+                  <span class="menu-item__dots" aria-hidden="true"></span>
+                  <p class="menu-item__price"><span class="visually-hidden">Pickup price from </span>${i.price}</p>
+                </div>
+                {(i.description || i.tags?.length || i.note) && (
+                  <div class="menu-item__meta">
+                    {i.description && <p class="menu-item__desc">{i.description}</p>}
+                    {i.tags?.includes('spicy') && <span class="tag tag--spicy"><Icon name="flame" /> Spicy</span>}
+                    {i.tags?.includes('vegetarian-friendly') && <span class="tag tag--veg"><Icon name="leaf" /> Vegetable</span>}
+                    {i.note && <span class="tag">{i.note}</span>}
+                  </div>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  ))}
+</div>
+
+<style>
+  .menu-nav { position: sticky; top: 4.25rem; z-index: 30; background: rgb(250 248 244 / 0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--c-line); }
+  .menu-nav__list { display: flex; gap: 0.25rem; overflow-x: auto; scrollbar-width: none; padding-block: 0.5rem; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
+  .menu-nav__list::-webkit-scrollbar { display: none; }
+  .menu-nav__link { display: inline-block; white-space: nowrap; min-height: 2.5rem; padding: 0.45rem 0.9rem; border-radius: 999px; font-weight: 600; font-size: 0.95rem; text-decoration: none; color: var(--c-ink-soft); scroll-snap-align: start; }
+  .menu-nav__link:hover { color: var(--c-ink); background: var(--c-marble-2); }
+  .menu-nav__link[aria-current='true'] { background: var(--c-navy); color: var(--c-white); }
+
+  .menu-body { padding-block: clamp(1.5rem, 4vw, 3rem) var(--section); }
+  .menu-body__disclosure { max-width: 70ch; margin-bottom: 1.5rem; }
+  .menu-cat { padding-block: clamp(1.5rem, 4vw, 2.75rem); border-top: 1px solid var(--c-line); scroll-margin-top: 8.25rem; }
+  .menu-cat__head { display: grid; gap: 0.35rem; margin-bottom: 1.25rem; }
+  .menu-items { display: grid; gap: 0.35rem 3rem; }
+  @media (min-width: 60rem) { .menu-items { grid-template-columns: repeat(2, 1fr); } }
+  .menu-item { display: grid; grid-template-columns: 1fr; gap: 0.85rem; padding: 0.7rem 0; border-bottom: 1px dashed var(--c-line); align-items: start; }
+  .menu-item--photo { grid-template-columns: 5.5rem 1fr; }
+  @media (min-width: 60rem) { .menu-item--photo { grid-template-columns: 6.5rem 1fr; } }
+  .menu-item__thumb { display: block; width: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--c-marble-2); box-shadow: 0 1px 0 var(--c-line); cursor: zoom-in; }
+  .menu-item__thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 400ms var(--ease); }
+  .menu-item__thumb:hover img { transform: scale(1.05); }
+  .menu-item__thumb:focus-visible { outline: 3px solid var(--c-red); outline-offset: 2px; }
+  .menu-item__text { min-width: 0; }
+  .menu-item__row { display: flex; align-items: baseline; gap: 0.6rem; }
+  .menu-item__name { font-family: var(--font-body); font-weight: 650; font-size: 1.02rem; letter-spacing: 0; line-height: 1.35; }
+  .menu-item__code { color: var(--c-ink-soft); font-weight: 500; font-size: 0.85em; margin-right: 0.15rem; }
+  .menu-item__dots { flex: 1; border-bottom: 2px dotted var(--c-line); min-width: 1rem; transform: translateY(-0.3em); }
+  .menu-item__price { font-family: var(--font-display); font-weight: 750; white-space: nowrap; }
+  .menu-item__meta { display: flex; flex-wrap: wrap; gap: 0.35rem 0.6rem; align-items: center; margin-top: 0.25rem; }
+  .menu-item__desc { color: var(--c-ink-soft); font-size: 0.95rem; flex-basis: 100%; }
+  .tag { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 650; padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--c-marble-2); color: var(--c-ink-soft); }
+  .tag svg { width: 0.9rem; height: 0.9rem; }
+  .tag--spicy { background: #fdeceb; color: var(--c-red-deep); }
+  .tag--veg { background: #e8f1e6; color: #2e5a2b; }
+  @media (prefers-reduced-motion: reduce) { .menu-item__thumb img, .menu-item__thumb:hover img { transition: none; transform: none; } }
+</style>
+
+<script>
+  const initMenuNav = () => {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-menu-link]'));
+    const cats = Array.from(document.querySelectorAll<HTMLElement>('[data-menu-cat]'));
+    if (!links.length || !cats.length) return;
+    const setCurrent = (id: string) => {
+      links.forEach((l) => {
+        const on = l.dataset.menuLink === id;
+        if (on) { l.setAttribute('aria-current', 'true'); l.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); }
+        else l.removeAttribute('aria-current');
+      });
+    };
+    let last = '';
+    const update = () => {
+      let current = cats[0].dataset.menuCat!;
+      for (const c of cats) { if (c.getBoundingClientRect().top <= 150) current = c.dataset.menuCat!; }
+      if (current !== last) { last = current; setCurrent(current); }
+    };
+    let timer: number | undefined;
+    const onScroll = () => { if (timer === undefined) timer = window.setTimeout(() => { timer = undefined; update(); }, 80); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    if ('IntersectionObserver' in window) { const io = new IntersectionObserver(() => update(), { rootMargin: '-150px 0px 0px 0px', threshold: [0, 1] }); cats.forEach((c) => io.observe(c)); }
+    update();
+  };
+  document.addEventListener('astro:page-load', initMenuNav);
+</script>

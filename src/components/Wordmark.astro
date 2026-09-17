@@ -1,0 +1,27 @@
+---
+/**
+ * Typographic wordmark built from the storefront sign's two-line lockup (red FAMILY over
+ * MONGOLIAN BBQ). No logo master was supplied, so the cartoon family mark is NOT reproduced —
+ * see docs/asset-manifest.md ("Missing: logo master").
+ */
+import { business } from '@data/business';
+export interface Props { size?: 'sm' | 'md' | 'lg'; onDark?: boolean; class?: string }
+const { size = 'md', onDark = false, class: cls } = Astro.props;
+---
+<span class:list={['wordmark', `wordmark--${size}`, { 'wordmark--dark': onDark }, cls]} translate="no">
+  <span class="wordmark__top">{business.wordmark.top}</span>
+  <span class="wordmark__bottom">{business.wordmark.bottom}</span>
+</span>
+
+<style>
+  .wordmark { display: inline-grid; line-height: 0.9; font-family: var(--font-display); text-transform: uppercase; }
+  .wordmark__top { font-weight: 900; font-stretch: 112%; color: var(--c-red); letter-spacing: -0.02em; }
+  .wordmark__bottom { font-weight: 700; font-stretch: 100%; letter-spacing: 0.12em; color: var(--c-ink); }
+  .wordmark--dark .wordmark__bottom { color: var(--c-white); }
+  .wordmark--sm .wordmark__top { font-size: 1.35rem; }
+  .wordmark--sm .wordmark__bottom { font-size: 0.5rem; letter-spacing: 0.16em; }
+  .wordmark--md .wordmark__top { font-size: 1.9rem; }
+  .wordmark--md .wordmark__bottom { font-size: 0.7rem; }
+  .wordmark--lg .wordmark__top { font-size: clamp(3.4rem, 11vw, 8rem); line-height: 0.85; }
+  .wordmark--lg .wordmark__bottom { font-size: clamp(1rem, 3.1vw, 2.3rem); letter-spacing: 0.14em; margin-top: 0.15em; }
+</style>

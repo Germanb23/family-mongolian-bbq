@@ -1,0 +1,56 @@
+---
+/**
+ * Mobile-only sticky order bar. Appears once the hero has scrolled out of view, reserves bottom
+ * padding on <body> so it never covers content, and is hidden on wide screens where the header
+ * button is always visible.
+ */
+import { business } from '@data/business';
+import Icon from './Icons.astro';
+---
+<div class="sticky-order" data-sticky-order hidden>
+  <a class="btn btn--primary sticky-order__btn" href={business.order.doordash.url} target="_blank" rel="noopener"><Icon name="bag" /> Order Online</a>
+  <a class="sticky-order__call" href={`tel:${business.phone.e164}`} aria-label={`Call ${business.phone.display}`}><Icon name="phone" /></a>
+</div>
+
+<style>
+  .sticky-order {
+    position: fixed; inset-inline: 0; bottom: 0; z-index: 40;
+    display: none; gap: 0.6rem; align-items: center;
+    padding: 0.6rem var(--gutter) calc(0.6rem + env(safe-area-inset-bottom));
+    background: rgb(250 248 244 / 0.96); border-top: 1px solid var(--c-line);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    transform: translateY(100%); transition: transform 260ms var(--ease);
+  }
+  .sticky-order.is-visible { transform: none; }
+  .sticky-order__btn { flex: 1; }
+  .sticky-order__call { width: 3rem; height: 3rem; display: grid; place-items: center; border: 2px solid var(--c-navy); color: var(--c-navy); border-radius: 999px; flex: none; }
+  .sticky-order__call svg { width: 1.2rem; height: 1.2rem; }
+  @media (max-width: 59.99rem) {
+    .sticky-order:not([hidden]) { display: flex; }
+    :global(body.has-sticky-order) { padding-bottom: 4.75rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .sticky-order { transition: none; } }
+</style>
+
+<script>
+  let apply: (() => void) | null = null;
+  let timer: number | undefined;
+  const onScroll = () => { if (timer === undefined) timer = window.setTimeout(() => { timer = undefined; apply?.(); }, 60); };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  const initSticky = () => {
+    const bar = document.querySelector<HTMLElement>('[data-sticky-order]');
+    const sentinel = document.querySelector<HTMLElement>('[data-hero-end]');
+    document.body.classList.remove('has-sticky-order');
+    if (!bar) { apply = null; return; }
+    bar.hidden = false;
+    apply = () => {
+      // Home: show after the hero. Other pages: show after 320px of scroll.
+      const show = sentinel ? sentinel.getBoundingClientRect().top < 72 : window.scrollY > 320;
+      bar.classList.toggle('is-visible', show);
+      document.body.classList.toggle('has-sticky-order', show);
+    };
+    apply();
+  };
+  document.addEventListener('astro:page-load', initSticky);
+</script>
