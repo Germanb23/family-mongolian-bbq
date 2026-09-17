@@ -1,6 +1,6 @@
 # Business Intake Report + Fact & Conflict Report
 
-Project: Family Mongolian BBQ website · Prepared Sept 17, 2026 · Status: **local preview only, not deployed**
+Project: Family Mongolian BBQ website · Prepared Sept 17, 2026 · Status: **live at https://germanb23.github.io/family-mongolian-bbq/ (GitHub Pages, owner-authorized Sept 17, 2026)**
 
 ## 1. Business intake
 
