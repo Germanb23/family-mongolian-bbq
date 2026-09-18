@@ -60,7 +60,7 @@ A neighborhood grill house on Tapo Street that has fed Simi Valley since 2013. T
 | — | Reveal-on-scroll | Sections | Single 14 px rise + fade; 2.5 s safety so nothing stays hidden. | Off under reduced motion. | CSS only when no JS. | No content ever hidden. |
 
 ## Editorial titles & layering
-- Home hero: the sign wordmark. Arrival: "Park out front. Walk into the glow." with a ghost TAPO ST outline and the headline overlapping the exterior photo's edge; the door photo tucks under it. Grill: "You build the bowl. We fire the grill." with a ghost GRILL and the raw-bowl portrait overlapping the bar flat-lay. Menu page: "Wok-fired on Tapo Street since 2013." with two portraits overlapping the headline. Ghost words are aria-hidden outlines; real headings are plain HTML text above everything.
+- Home hero: the sign wordmark. Arrival: "Park out front. Walk into the glow." with a ghost TAPO ST outline beside the exterior photo (text and photos in separate columns, no overlap). Grill: "You build the bowl. We fire the grill." with a ghost GRILL and the raw-bowl portrait stacked below the bar flat-lay. Menu page: "Wok-fired on Tapo Street since 2013." with two portraits overlapping the headline. Ghost words are aria-hidden outlines; real headings are plain HTML text above everything.
 - Page transitions: 140 ms fade-out, 320 ms fade-in + 12 px rise (reverse direction on Back); header persists; instant under reduced motion.
 - Scroll story: staggered reveals (--i × 70 ms), desktop-only parallax on the three arrival photos and menu title art (≤ 26 px, paused offscreen), none under reduced motion.
 
