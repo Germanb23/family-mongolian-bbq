@@ -101,7 +101,38 @@ Derivatives (Pillow, WebP q80): `public/img/portrait/<id>-941.webp` and `-600.we
 | beef-broccoli | p33 | beef + broccoli + carrot | **B1 Beef Broccoli** |
 | walnut-shrimp | p34 | glazed shrimp + candied walnuts + broccoli | **S15 Walnut Shrimp** |
 
-**16 menu items carry a confirmed thumbnail. 5 portraits are unresolved** (shown only in the gallery, captioned generically). Menu items with no portrait at all (C1 Cashew Chicken, C11 Kung Pao Chicken, all lamb, pork, most seafood, all rice/noodle lines, and others) simply have no photo.
+**Batch 1 result: 16 menu items carry a confirmed thumbnail; 5 portraits unresolved** (gallery only, captioned generically).
+
+## 2c. Owner PORTRAIT set, batch 2 (20 WebPs, 1125×2000, attached Sept 22, 2026)
+
+Masters: `assets-master/portrait-batch2/NN-<id>.webp`. Derivatives as in §2b (`<id>-941/600.webp`, `<id>-sq-480/240.webp`). Matched by content:
+
+| # | Portrait id | Content seen | Result |
+|---|---|---|---|
+| 1 | bbq-pork | red char siu slices, sesame, celery leaf | **A1 Barbecue Pork** |
+| 2 | bbq-pork-broccoli | char siu + broccoli | **P1 BBQ Pork with Broccoli** |
+| 3 | beef-bell-pepper | beef, green bell pepper, mushroom, onion, water chestnut | **B3 Beef with Bell Pepper** (best match; B5 possible) |
+| 4 | beef-mixed-vegetables | beef + broccoli, cabbage, zucchini, snow peas, carrot, pepper | **B4 Beef with Mixed Vegetables** |
+| 5 | pork-hot-garlic | shredded pale meat, green pepper, carrot, mushroom, red-tinted sauce | **P4 Pork in Hot Garlic Sauce** (best match; C4 possible) |
+| 6 | egg-flower-soup | egg ribbons, carrot, peas | **SO2 Egg Flower Soup** |
+| 7 | chicken-egg-foo-young | 2 patties + chicken/vegetable stir-fry | **EF2 Chicken Egg Foo Young** (best match; filling not visible) |
+| 8 | eggplant-tofu | eggplant + fried tofu, chili-garlic sauce | **V1 Eggplant with Tofu** |
+| 9 | chicken-onion-scallion | sliced white meat, onion, leek, scallion | **UNRESOLVED**: C7 (same subject as p19) or P7 Shredded Pork with Scallion. Not attached. |
+| 10 | hot-sour-soup | thick brown soup, mushroom, tofu, egg | **SO3 Hot and Sour Soup** |
+| 11 | house-chow-fun | wide rice noodles, shrimp, chicken, beef, sprouts | **RN4 House Special Chow Fun** |
+| 12 | house-chow-mein | egg noodles, shrimp, beef, chicken, cabbage | **RN3 House Special Chow Mein** |
+| 13 | house-fried-rice | fried rice, shrimp, beef, chicken | **RN1 House Special Fried Rice** |
+| 14 | house-special-mei-fun | thin vermicelli, shrimp, beef, chicken | **RN5 House Special Mei Fun** |
+| 15 | kung-pao-chicken | diced chicken, peanuts, zucchini, carrot, dried chili | **C11 Kung Pao Chicken** |
+| 16 | garden-vegetables | mixed vegetables only, light sauce | **V5 Sautéed Garden Vegetables** |
+| 17 | cashew-shrimp | shrimp (curled, segmented), cashews, zucchini, carrot | **S6 Cashew Shrimp** |
+| 18 | sweet-sour-chicken | battered pieces, red sauce, onion, pineapple | **C16 Sweet & Sour Chicken** |
+| 19 | vegetable-tofu-soup-2 | clear broth, tofu, broccoli, snow peas | **SO4** (second photo; now used on the row) |
+| 20 | wor-wonton-soup | wontons, char siu, chicken, broccoli, snow peas | **SO5 Wor Wonton Soup** |
+
+**Running total: 34 menu items carry a portrait thumbnail** (16 + 18 new; SO4 swapped to the newer shot). Still no photo: all lamb (CS2 to CS5), most single-variant chicken/beef/pork/seafood lines, single-protein rice and noodle lines.
+
+Batch-1 unresolved portraits p04 (thin noodles) and p28 (egg noodles) are now redundant for the menu because RN5 and RN3 have confirmed batch-2 photos; they stay in the gallery.
 
 ### Hero loop derivative (re-cut from `FMB Hero 2.0.mp4` on Sept 22, 2026)
 `public/media/hero-loop-1080.mp4` (8.2 MB) and `hero-loop-720.mp4` (3.4 MB): the full approved clip, muted, plus a 0.7 s dissolve from its last frames to its own first frame (ffmpeg `xfade`, offset 11.05 s), total 11.83 s. Measured mean pixel difference between the derivative's last and first frame: 2.5 / 255 (identical to the eye) versus 60 / 255 for the raw clip, so `loop` restarts without a cut. Posters `hero-poster.jpg` (1920 w) and `hero-poster-960.jpg` were regenerated from the new first frame (same exterior scene). The Sept 17 derivatives from the 6.73 s clip were overwritten. No frames were regenerated. The earlier play-once files were removed.

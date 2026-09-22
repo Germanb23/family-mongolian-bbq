@@ -63,5 +63,5 @@ Project: Family Mongolian BBQ website · Prepared Sept 17, 2026 · Status: **liv
 3. Confirm whether the Toast pickup link should appear next to DoorDash as "Order pickup direct".
 4. Confirm which interior edit is the official one (see asset manifest §3).
 5. Supply: logo master (vector), email, social links, domain/hosting, analytics preference, any legal pages.
-6. Confirm dish names for the five unresolved portrait photos (asset manifest §2b): thin-noodle plate (RN5?), moo shu (P3 or C12?), egg foo young variant (EF1–EF5?), red chili-garlic plate (S3 / C4 / S11 / CS7?), house noodles (RN3 or RN2?).
+6. Confirm dish names for the unresolved portrait photos (asset manifest §2b/§2c): moo shu (P3 or C12?), batch-1 egg foo young (EF1–EF5?), red chili-garlic plate (S3 / C4 / S11 / CS7?), and the batch-2 onion-and-scallion plate (C7 Mongolian Chicken or P7 Shredded Pork with Scallion?). Also confirm four best-match attachments: B3 Beef with Bell Pepper, P4 Pork in Hot Garlic Sauce, EF2 Chicken Egg Foo Young, S6 Cashew Shrimp.
 7. Six of the "33" portrait PNGs did not arrive (27 unique were recovered). Re-attach them if they exist.
