@@ -45,9 +45,9 @@ Images (Pillow) and video (ffmpeg from `imageio-ffmpeg`) were generated with one
 python -m pip install --user Pillow imageio-ffmpeg
 # video (from the project root)
 FF=$(python -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())")
-# 1) first frame at full resolution; 2) clip + 0.7 s dissolve back to that frame, scaled to 1080p (repeat with scale=1280:-2 / crf 26 for 720p)
-"$FF" -ss 0 -i "assets-master/owner/FMB hero vid.mp4" -frames:v 1 -q:v 2 first.jpg
-"$FF" -i "assets-master/owner/FMB hero vid.mp4" -loop 1 -t 0.8 -i first.jpg -filter_complex "[1:v]scale=3832:2160,format=yuv420p,setsar=1,fps=30[b];[0:v]format=yuv420p,setsar=1[a];[a][b]xfade=transition=fade:duration=0.7:offset=6.03[v];[v]scale=1920:-2[v1]" -map "[v1]" -an -c:v libx264 -preset slow -crf 24 -pix_fmt yuv420p -movflags +faststart public/media/hero-loop-1080.mp4
+# 1) first frame at full resolution; 2) clip + 0.7 s dissolve back to that frame (offset = duration − 0.7), scaled to 1080p (repeat with scale=1280:-2 / crf 26 for 720p). Posters: first.jpg scaled to 1920 and 960 wide.
+"$FF" -ss 0 -i "assets-master/owner/FMB Hero 2.0.mp4" -frames:v 1 -q:v 2 first.jpg
+"$FF" -i "assets-master/owner/FMB Hero 2.0.mp4" -loop 1 -t 0.8 -i first.jpg -filter_complex "[1:v]scale=3832:2160,format=yuv420p,setsar=1,fps=30[b];[0:v]format=yuv420p,setsar=1[a];[a][b]xfade=transition=fade:duration=0.7:offset=11.05[v];[v]scale=1920:-2[v1]" -map "[v1]" -an -c:v libx264 -preset slow -crf 24 -pix_fmt yuv420p -movflags +faststart public/media/hero-loop-1080.mp4
 ```
 
 ## Deploying (GitHub Pages)
